@@ -21,7 +21,6 @@ return users.find(user => user.username === username && user.password === passwo
 //only registered users can login
 regd_users.post("/login", (req,res) => {
   //Write your code here
-  console.log(users);
   const { username, password} = req.body;
   if (!username || !password) {
     return res.status(400).json({message: "Username and password required"});
@@ -33,6 +32,9 @@ regd_users.post("/login", (req,res) => {
 
   // create JWT token
   const token  = jwt.sign({username: user.username}, JWT_SECRET, {expiresIn: "1h"});
+  req.session.authorization = {
+    accessToken: token,
+  }
   return res.json({
     message: "Login successfull",
     token
