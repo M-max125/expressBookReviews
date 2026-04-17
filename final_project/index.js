@@ -19,11 +19,11 @@ if (req.session.authorization) {
             req.user = user;
             next();
         } else {
-            return res.status(403).json({message: "User not authenticated !"});
+            return res.status(403).json({ message: "User not authenticated" });
         }
     });
-}else {
-    return res.status(403).json({ message: "User not logged in ! "};)
+} else {
+    return res.status(403).json({ message: "User not logged in"});
 }
 });
  
