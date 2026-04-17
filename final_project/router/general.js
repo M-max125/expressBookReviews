@@ -27,7 +27,6 @@ public_users.get('/isbn/:isbn',function (req, res) {
 public_users.get('/author/:author',function (req, res) {
   //Write your code here
   const author = req.params.author;
-  const entries = Object.entries(books);
   const book = Object.values(books).find(b => b.author === author);
   if (book) {
     return res.send(book);
@@ -39,7 +38,12 @@ public_users.get('/author/:author',function (req, res) {
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const title = req.params.title;
+  const book = Object.values(books).find(b => b.title === title);
+  if (book) {
+    return res.send(book);
+  } else {
+    return res.status(404).json({message: " There is no book with this title "});  }
 });
 
 //  Get book review
