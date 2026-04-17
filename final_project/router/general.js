@@ -1,8 +1,11 @@
 const express = require('express');
 let books = require("./booksdb.js");
+const axios = require("axios");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
+
+const BOOKS_API = "http://localhost:5000/books";
 
 const getAllBooks = () => {
     return new Promise((resolve) => {
@@ -65,14 +68,25 @@ public_users.post("/register", (req,res) => {
     users
   });
 });
+// Mock book api 
+public_users.get('/books', async function (req, res) {
+    try {
+      const allBooks = await getAllBooks();
+      return res.status(200).json(allBooks);
+    } catch (error) {
+      return res.status(500).json({message: "Internal server error"});
+    }
+    
+  });
 
 // Get the book list available in the shop
 public_users.get('/', async function (req, res) {
   //Write your code here
   try {
-    const allBooks = await getAllBooks();
-    return res.json(allBooks);
+    const allBooks = await axios.get(BOOKS_API);
+    return res.status(200).json(allBooks.data);
   } catch (error) {
+    console.log(error, 'error');
     return res.status(500).json({message: "Internal server error"});
   }
   
@@ -83,11 +97,13 @@ public_users.get('/isbn/:isbn', async function (req, res) {
   //Write your code here
   try {
     const isbn = req.params.isbn;
-    const book = await getBookByISBN(isbn);
-    if (!book) {
+    const response = await axios.get(BOOKS_API);
+    const books = response.data;
+    const resultBook = books[isbn];
+    if (!resultBook) {
       return res.status(404).json({message: "Book not found"});
     }
-    return res.json(book);
+    return res.json(resultBook);
   } catch(error) {
     return res.status(500).json({message: "Internal server error"});
   }
@@ -98,13 +114,15 @@ public_users.get('/author/:author', async function (req, res) {
   //Write your code here
   try {
     const author = req.params.author;
-    const book = await getBookByAuthor(author);
-    if (!book) {
+    const response = await axios.get(BOOKS_API);
+    const books = response.data;
+    const bookResult = Object.values(books).find(b => b.author === author);
+    if (!bookResult) {
       return res.status(404).json({message: "No book with this author"});
     }
-    return res.json(book);
+    return res.json(bookResult);
   } catch (error) {
-    return res.status(500).json({message: "Internal server error"});
+    return res.status(500).json({message: "Error fetching books"});
   }
   
 });
@@ -114,13 +132,15 @@ public_users.get('/title/:title', async function (req, res) {
   //Write your code here
   try {
     const title = req.params.title;
-    const book = await getBookByTitle(title);
-    if (!book) {
+    const response = await axios.get(BOOKS_API);
+    const books = response.data;
+    const bookResult = Object.values(books).find(b => b.title === title);
+    if (!bookResult) {
       return res.status(404).json({message: "No book with this title"});
     }
-    return res.json(book);
+    return res.json(bookResult);
   } catch (error) {
-    return res.status(500).json({message: "Internal server error"});
+    return res.status(500).json({message: "Error fetching books"});
   }
 });
 
